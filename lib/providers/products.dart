@@ -42,8 +42,9 @@ class Products with ChangeNotifier {
     return [..._items];
   }
 
-  void addProduct() {
-    notifyListeners();
+  // only give a copy of the items
+  List<Product> get favItems {
+    return _items.where((element) => element.isFavourite).toList();
   }
 
   Product findById(String id) {

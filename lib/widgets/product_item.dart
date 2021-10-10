@@ -10,34 +10,36 @@ class ProductItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final product = Provider.of<Product>(context);
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(10),
-      child: GestureDetector(
-        onTap: () {
-          Navigator.of(context)
-              .pushNamed(ProductDetail.routeName, arguments: product.id);
-        },
-        child: GridTile(
-          child: Image.network(
-            product.imageUrl,
-            fit: BoxFit.cover,
-          ),
-          footer: GridTileBar(
-            trailing: IconButton(
-              icon: Icon(Icons.shopping_cart),
-              color: Theme.of(context).colorScheme.secondary,
-              onPressed: null,
+    return Consumer<Product>(
+      builder: (ctx, product, _) => ClipRRect(
+        borderRadius: BorderRadius.circular(10),
+        child: GestureDetector(
+          onTap: () {
+            Navigator.of(context)
+                .pushNamed(ProductDetail.routeName, arguments: product.id);
+          },
+          child: GridTile(
+            child: Image.network(
+              product.imageUrl,
+              fit: BoxFit.cover,
             ),
-            leading: IconButton(
-              icon: Icon(
-                  product.isFavourite ? Icons.favorite : Icons.favorite_border),
-              onPressed: () {
-                product.toggleFav();
-              },
+            footer: GridTileBar(
+              trailing: IconButton(
+                icon: Icon(Icons.shopping_cart),
+                color: Theme.of(context).colorScheme.secondary,
+                onPressed: null,
+              ),
+              leading: IconButton(
+                icon: Icon(product.isFavourite
+                    ? Icons.favorite
+                    : Icons.favorite_border),
+                onPressed: () {
+                  product.toggleFav();
+                },
+              ),
+              backgroundColor: Colors.black45,
+              title: Text(product.title, textAlign: TextAlign.center),
             ),
-            backgroundColor: Colors.black45,
-            title: Text(product.title, textAlign: TextAlign.center),
           ),
         ),
       ),

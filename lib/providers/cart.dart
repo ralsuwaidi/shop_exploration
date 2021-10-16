@@ -1,61 +1,63 @@
 import 'package:flutter/foundation.dart';
 
-// single item inside cart
 class CartItem {
   final String id;
   final String title;
   final int quantity;
   final double price;
 
-  CartItem(
-      {@required this.id,
-      @required this.price,
-      @required this.quantity,
-      @required this.title});
+  CartItem({
+    @required this.id,
+    @required this.title,
+    @required this.quantity,
+    @required this.price,
+  });
 }
 
-// full cart
 class Cart with ChangeNotifier {
   Map<String, CartItem> _items = {};
 
-  Map<String, CartItem> get item {
+  Map<String, CartItem> get items {
     return {..._items};
   }
 
   int get itemCount {
-    return _items == null ? 0 : _items.length;
+    return _items.length;
   }
-
-  // total amount
 
   double get totalAmount {
     var total = 0.0;
-
-    _items.forEach((key, value) {
-      total += value.price * value.quantity;
+    _items.forEach((key, cartItem) {
+      total += cartItem.price * cartItem.quantity;
     });
-
     return total;
   }
 
-  void addItem(String productId, double price, String title) {
+  void addItem(
+    String productId,
+    double price,
+    String title,
+  ) {
     if (_items.containsKey(productId)) {
+      // change quantity...
       _items.update(
         productId,
-        (value) => CartItem(
-            id: value.id,
-            price: value.price,
-            quantity: value.quantity + 1,
-            title: value.title),
+        (existingCartItem) => CartItem(
+              id: existingCartItem.id,
+              title: existingCartItem.title,
+              price: existingCartItem.price,
+              quantity: existingCartItem.quantity + 1,
+            ),
       );
     } else {
       _items.putIfAbsent(
         productId,
         () => CartItem(
-            id: DateTime.now().toString(),
-            price: price,
-            quantity: 1,
-            title: title),
+              id: DateTime.now().toString(),
+              title: title,
+              price: price,
+              quantity: 1,
+            ),
       );
     }
     notifyListeners();
@@ -63,6 +65,11 @@ class Cart with ChangeNotifier {
 
   void removeItem(String productId) {
     _items.remove(productId);
+    notifyListeners();
+  }
+
+  void clear() {
+    _items = {};
     notifyListeners();
   }
 }

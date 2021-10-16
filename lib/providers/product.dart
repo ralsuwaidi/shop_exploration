@@ -1,24 +1,24 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 
-class Product extends ChangeNotifier {
+class Product with ChangeNotifier {
   final String id;
   final String title;
   final String description;
   final double price;
   final String imageUrl;
-  bool isFavourite;
+  bool isFavorite;
 
   Product({
-    @required this.description,
     @required this.id,
-    @required this.imageUrl,
-    @required this.price,
     @required this.title,
-    this.isFavourite = false,
+    @required this.description,
+    @required this.price,
+    @required this.imageUrl,
+    this.isFavorite = false,
   });
 
-  void toggleFav() {
-    isFavourite = !isFavourite;
+  void toggleFavoriteStatus() {
+    isFavorite = !isFavorite;
     notifyListeners();
   }
 }

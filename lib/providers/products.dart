@@ -1,5 +1,7 @@
-import 'package:flutter/material.dart';
+import 'dart:convert';
 
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import './product.dart';
 
 class Products with ChangeNotifier {
@@ -79,15 +81,35 @@ class Products with ChangeNotifier {
     notifyListeners();
   }
 
-  void addProduct(Product product) {
-    final newProduct = Product(
-        id: DateTime.now().toString(),
-        title: product.title,
-        description: product.description,
-        price: product.price,
-        imageUrl: product.imageUrl);
+  Future<void> addProduct(Product product) {
+    final url = Uri.parse(
+        'https://flutter-explore-ffcd0-default-rtdb.asia-southeast1.firebasedatabase.app/products.json');
 
-    _items.add(newProduct);
-    notifyListeners();
+    return http
+        .post(
+      url,
+      body: json.encode(
+        {
+          'title': product.title,
+          'description': product.description,
+          'imageUrl': product.imageUrl,
+          'price': product.price,
+          'isFavourite': product.isFavorite,
+        },
+      ),
+    )
+        .then(
+      (value) {
+        final newProduct = Product(
+            id: json.decode(value.body)['name'],
+            title: product.title,
+            description: product.description,
+            price: product.price,
+            imageUrl: product.imageUrl);
+        _items.add(newProduct);
+        notifyListeners();
+        print(newProduct.id);
+      },
+    );
   }
 }

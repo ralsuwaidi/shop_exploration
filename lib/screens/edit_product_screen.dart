@@ -23,6 +23,10 @@ class _EditProductScreenState extends State<EditProductScreen> {
   }
 
   void _saveForm() {
+    final isValid = _form.currentState.validate();
+    if (!isValid) {
+      return;
+    }
     _form.currentState.save();
   }
 
@@ -47,6 +51,12 @@ class _EditProductScreenState extends State<EditProductScreen> {
           child: ListView(
             children: [
               TextFormField(
+                validator: (value) {
+                  if (value.isEmpty) {
+                    return 'Title Cannot be empty';
+                  }
+                  return null;
+                },
                 decoration: InputDecoration(labelText: 'Title'),
                 textInputAction: TextInputAction.next,
                 onFieldSubmitted: (_) {

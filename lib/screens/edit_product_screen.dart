@@ -48,11 +48,13 @@ class _EditProductScreenState extends State<EditProductScreen> {
     if (_editedProduct.id != null) {
       // product exists
       Provider.of<Products>(context, listen: false)
-          .update(_editedProduct.id, _editedProduct);
-      setState(() {
-        _isLoading = false;
+          .update(_editedProduct.id, _editedProduct)
+          .then((value) {
+        setState(() {
+          _isLoading = false;
+        });
+        Navigator.of(context).pop();
       });
-      Navigator.of(context).pop();
     } else {
       // new product
       Provider.of<Products>(context, listen: false)

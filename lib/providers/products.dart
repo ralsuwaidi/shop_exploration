@@ -81,6 +81,36 @@ class Products with ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> fetchAndSet() async {
+    final url = Uri.parse(
+        'https://flutter-explore-ffcd0-default-rtdb.asia-southeast1.firebasedatabase.app/products.json');
+
+    try {
+      // get data
+      final response = await http.get(url);
+      // decode
+      final serverData = json.decode(response.body) as Map<String, dynamic>;
+      // new empty list
+      final List<Product> loadedProducts = [];
+      // map every item to list
+      serverData.forEach((key, value) {
+        loadedProducts.add(Product(
+          id: key,
+          title: value['title'],
+          price: value['price'],
+          description: value['description'],
+          isFavorite: value['isFavorite'],
+          imageUrl: value['imageUrl'],
+        ));
+      });
+
+      _items = loadedProducts;
+      notifyListeners();
+    } catch (err) {
+      throw err;
+    }
+  }
+
   Future<void> addProduct(Product product) {
     final url = Uri.parse(
         'https://flutter-explore-ffcd0-default-rtdb.asia-southeast1.firebasedatabase.app/products.json');
@@ -94,7 +124,7 @@ class Products with ChangeNotifier {
           'description': product.description,
           'imageUrl': product.imageUrl,
           'price': product.price,
-          'isFavourite': product.isFavorite,
+          'isFavorite': product.isFavorite,
         },
       ),
     )

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import '../models/http_exception.dart';
 import './product.dart';
 
 class Products with ChangeNotifier {
@@ -70,7 +71,7 @@ class Products with ChangeNotifier {
     final productIndex = _items.indexWhere((element) => element.id == id);
     if (productIndex >= 0) {
       final url = Uri.parse(
-          'https://flutter-explore-ffcd0-default-rtdb.asia-southeast1.firebasedatabase.app/$id.json');
+          'https://flutter-explore-ffcd0-default-rtdb.asia-southeast1.firebasedatabase.app/products/$id.json');
 
       await http.patch(url,
           body: json.encode({
@@ -87,8 +88,22 @@ class Products with ChangeNotifier {
   }
 
   void delete(String id) {
-    _items.removeWhere((element) => element.id == id);
+    final url = Uri.parse(
+        'https://flutter-explore-ffcd0-default-rtdb.asia-southeast1.firebasedatabase.app/products/$id.json');
+
+    final existingProductIndex =
+        _items.indexWhere((element) => element.id == id);
+    var existingProduct = _items[existingProductIndex];
+    _items.removeAt(existingProductIndex);
+
     notifyListeners();
+    http.delete(url).then((response) {
+      if (response.statusCode >= 400) {
+        // error occured while deleting
+        HttpException('Could not delete product.');
+      }
+      existingProduct = null;
+    });
   }
 
   Future<void> fetchAndSet() async {

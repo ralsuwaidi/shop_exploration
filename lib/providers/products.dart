@@ -1,8 +1,5 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import '../models/http_exception.dart';
+
 import './product.dart';
 
 class Products with ChangeNotifier {
@@ -67,104 +64,31 @@ class Products with ChangeNotifier {
   //   notifyListeners();
   // }
 
-  Future<void> update(String id, Product newProduct) async {
-    final productIndex = _items.indexWhere((element) => element.id == id);
-    if (productIndex >= 0) {
-      final url = Uri.parse(
-          'https://flutter-explore-ffcd0-default-rtdb.asia-southeast1.firebasedatabase.app/products/$id.json');
+  void addProduct(Product product) {
+    final newProduct = Product(
+      title: product.title,
+      description: product.description,
+      price: product.price,
+      imageUrl: product.imageUrl,
+      id: DateTime.now().toString(),
+    );
+    _items.add(newProduct);
+    // _items.insert(0, newProduct); // at the start of the list
+    notifyListeners();
+  }
 
-      await http.patch(url,
-          body: json.encode({
-            'title': newProduct.title,
-            'description': newProduct.description,
-            'imageUrl': newProduct.imageUrl,
-            'price': newProduct.price,
-          }));
-      _items[productIndex] = newProduct;
+  void updateProduct(String id, Product newProduct) {
+    final prodIndex = _items.indexWhere((prod) => prod.id == id);
+    if (prodIndex >= 0) {
+      _items[prodIndex] = newProduct;
       notifyListeners();
     } else {
       print('...');
     }
   }
 
-  void delete(String id) {
-    final url = Uri.parse(
-        'https://flutter-explore-ffcd0-default-rtdb.asia-southeast1.firebasedatabase.app/products/$id.json');
-
-    final existingProductIndex =
-        _items.indexWhere((element) => element.id == id);
-    var existingProduct = _items[existingProductIndex];
-    _items.removeAt(existingProductIndex);
-
+  void deleteProduct(String id) {
+    _items.removeWhere((prod) => prod.id == id);
     notifyListeners();
-    http.delete(url).then((response) {
-      if (response.statusCode >= 400) {
-        // error occured while deleting
-        HttpException('Could not delete product.');
-      }
-      existingProduct = null;
-    });
-  }
-
-  Future<void> fetchAndSet() async {
-    final url = Uri.parse(
-        'https://flutter-explore-ffcd0-default-rtdb.asia-southeast1.firebasedatabase.app/products.json');
-
-    try {
-      // get data
-      final response = await http.get(url);
-      // decode
-      final serverData = json.decode(response.body) as Map<String, dynamic>;
-      // new empty list
-      final List<Product> loadedProducts = [];
-      // map every item to list
-      serverData.forEach((key, value) {
-        loadedProducts.add(Product(
-          id: key,
-          title: value['title'],
-          price: value['price'],
-          description: value['description'],
-          isFavorite: value['isFavorite'],
-          imageUrl: value['imageUrl'],
-        ));
-      });
-
-      _items = loadedProducts;
-      notifyListeners();
-    } catch (err) {
-      throw err;
-    }
-  }
-
-  Future<void> addProduct(Product product) {
-    final url = Uri.parse(
-        'https://flutter-explore-ffcd0-default-rtdb.asia-southeast1.firebasedatabase.app/products.json');
-
-    return http
-        .post(
-      url,
-      body: json.encode(
-        {
-          'title': product.title,
-          'description': product.description,
-          'imageUrl': product.imageUrl,
-          'price': product.price,
-          'isFavorite': product.isFavorite,
-        },
-      ),
-    )
-        .then(
-      (value) {
-        final newProduct = Product(
-            id: json.decode(value.body)['name'],
-            title: product.title,
-            description: product.description,
-            price: product.price,
-            imageUrl: product.imageUrl);
-        _items.add(newProduct);
-        notifyListeners();
-        print(newProduct.id);
-      },
-    );
   }
 }
